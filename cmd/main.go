@@ -28,6 +28,7 @@ func main() {
 	case 1:
 		data := day1.Parse(lines)
 		fmt.Printf("Part 1: %d\n", day1.Part1(data))
+		fmt.Printf("Part 2: %d\n", day1.Part2(data))
 	default:
 		fmt.Fprintf(os.Stderr, "Day %d not implemented yet.\n", *day)
 	}
