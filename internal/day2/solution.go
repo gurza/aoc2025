@@ -22,6 +22,7 @@ func Parse(input []string) Input {
 			s := strconv.Itoa(num)
 			len := len(s)
 
+			// repeated twice
 			half := len / 2
 			if s[:half] == s[half:] {
 				sum1 += uint64(num)
@@ -29,6 +30,7 @@ func Parse(input []string) Input {
 				continue
 			}
 
+			// repeated
 			for lenU := 1; lenU <= len/2; lenU++ {
 				if len%lenU != 0 {
 					continue
