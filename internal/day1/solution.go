@@ -4,51 +4,44 @@ import (
 	"strconv"
 )
 
-func Parse(input []string) []int {
-	res := make([]int, len(input))
-	for i, s := range input {
-		n, _ := strconv.Atoi(s[1:])
+type Input struct {
+	p1 uint64
+	p2 uint64
+}
+
+func Parse(input []string) Input {
+	var sum1, sum2 uint64
+
+	pos := 50
+	old := 0
+	for _, s := range input {
+		num, _ := strconv.Atoi(s[1:])
+
+		old = pos
 		if s[0] == 'L' {
-			res[i] = -n
-		} else {
-			res[i] = n
-		}
-	}
-	return res
-}
-
-func Part1(steps []int) int {
-	pos := 50
-	pwd := 0
-
-	for _, step := range steps {
-		pos += step
-		if pos%100 == 0 {
-			pwd += 1
-		}
-	}
-
-	return pwd
-}
-
-func Part2(steps []int) int {
-	pos := 50
-	pwd := 0
-
-	for _, step := range steps {
-		old := pos
-		pos = pos + step
-
-		if step > 0 {
-			// check (old, pos]
-			pwd += floorDiv(pos, 100) - floorDiv(old, 100)
-		} else {
+			pos -= num
 			// check [old, pos)
-			pwd += floorDiv(old-1, 100) - floorDiv(pos-1, 100)
+			sum2 += uint64(floorDiv(old-1, 100) - floorDiv(pos-1, 100))
+		} else {
+			pos += num
+			// check (old, pos]
+			sum2 += uint64(floorDiv(pos, 100) - floorDiv(old, 100))
+		}
+
+		if pos%100 == 0 {
+			sum1 += 1
 		}
 	}
 
-	return pwd
+	return Input{sum1, sum2}
+}
+
+func Part1(input Input) uint64 {
+	return input.p1
+}
+
+func Part2(input Input) uint64 {
+	return input.p2
 }
 
 // floorDiv returns floor(a/n) for positive n. Unlike Go's / operator,
