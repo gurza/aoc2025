@@ -11,8 +11,14 @@ func Parse(input []string) Input {
 	rows := len(input)
 	cols := len(input[0])
 
+	grid := make([][]byte, rows)
+	for i := range grid {
+		grid[i] = make([]byte, cols)
+		copy(grid[i], input[i])
+	}
+
 	isAt := func(r, c int) bool {
-		return r >= 0 && r < rows && c >= 0 && c < cols && input[r][c] == '@'
+		return r >= 0 && r < rows && c >= 0 && c < cols && grid[r][c] == '@'
 	}
 
 	dirs := [][2]int{
@@ -21,24 +27,43 @@ func Parse(input []string) Input {
 		{1, -1}, {1, 0}, {1, 1},
 	}
 
-	adjCnt := 0
-	for r := range rows {
-		for c := range cols {
-			if input[r][c] != '@' {
-				continue
-			}
+	firstPass := true
+	adj := 0
+	for {
+		var toRemove [][2]int
 
-			adjCnt = 0
-			for _, dir := range dirs {
-				cr, cc := r+dir[0], c+dir[1]
-				if isAt(cr, cc) {
-					adjCnt += 1
+		for r := range rows {
+			for c := range cols {
+				if grid[r][c] != '@' {
+					continue
+				}
+
+				adj = 0
+				for _, dir := range dirs {
+					cr, cc := r+dir[0], c+dir[1]
+					if isAt(cr, cc) {
+						adj += 1
+					}
+				}
+				if adj < 4 {
+					toRemove = append(toRemove, [2]int{r, c})
 				}
 			}
-			if adjCnt < 4 {
-				cnt1 += 1
-			}
 		}
+
+		if len(toRemove) == 0 {
+			break
+		}
+
+		if firstPass {
+			cnt1 = uint64(len(toRemove))
+			firstPass = false
+		}
+
+		for _, pos := range toRemove {
+			grid[pos[0]][pos[1]] = '.'
+		}
+		cnt2 += uint64(len(toRemove))
 	}
 
 	return Input{cnt1, cnt2}
