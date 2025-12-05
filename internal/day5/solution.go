@@ -3,6 +3,8 @@ package day5
 import (
 	"math"
 	"sort"
+	"strconv"
+	"strings"
 )
 
 type Input struct {
@@ -20,18 +22,28 @@ func Parse(input []string) Input {
 	var p1, p2 uint64
 
 	afterBlank := false
+	var rawRanges []rangePair
+	var mergedRanges []rangePair
 	for _, line := range input {
 		if line == "" {
+			mergedRanges = mergeRanges(rawRanges)
 			afterBlank = true
 			continue
 		}
 		if !afterBlank {
-			// handle range
-
+			// handle range, not safety
+			pp := strings.SplitN(line, "-", 2)
+			start, _ := strconv.Atoi(pp[0])
+			end, _ := strconv.Atoi(pp[1])
+			rawRanges = append(rawRanges, rangePair{start, end})
 			continue
 		}
 
-		// handle ID
+		// handle ID, not safety too
+		id, _ := strconv.Atoi(line)
+		if isFresh(id, mergedRanges) {
+			p1++
+		}
 	}
 
 	return Input{p1, p2}
@@ -68,6 +80,22 @@ func mergeRanges(ranges []rangePair) []rangePair {
 	out = append(out, cur)
 
 	return out
+}
+
+func isFresh(id int, ranges []rangePair) bool {
+	lo, hi := 0, len(ranges)
+	for lo < hi {
+		mid := (lo + hi) / 2
+		r := ranges[mid]
+		if id < r.start {
+			hi = mid
+		} else if id > r.end {
+			lo = mid + 1
+		} else {
+			return true
+		}
+	}
+	return false
 }
 
 func Part1(input Input) uint64 {
