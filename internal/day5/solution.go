@@ -45,6 +45,9 @@ func Parse(input []string) Input {
 			p1++
 		}
 	}
+	for _, r := range mergedRanges {
+		p2 += uint64(r.end - r.start + 1)
+	}
 
 	return Input{p1, p2}
 }
