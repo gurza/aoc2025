@@ -31,20 +31,94 @@ func Parse(input []string) Input {
 			nums = append(nums, uint64(num))
 		}
 
-		sym := ff[rows-1][c][0]
+		op := ff[rows-1][c][0]
 
 		res := nums[0]
-		if sym == '*' {
+		if op == '*' {
 			for _, x := range nums[1:] {
 				res *= x
 			}
-		} else {
+		} else { // +
 			for _, x := range nums[1:] {
 				res += x
 			}
 		}
 
 		p1 += res
+	}
+
+	cols2 := len(input[0]) // all strings in input have equal length
+
+	grid := make([][]byte, rows)
+	for r, line := range input {
+		grid[r] = []byte(line)
+	}
+
+	solveP2 := func(colIdxs []int) {
+		var op byte
+		for _, c := range colIdxs {
+			b := grid[rows-1][c]
+			if b == '*' || b == '+' {
+				op = b
+				break
+			}
+		}
+
+		nums := make([]uint64, 0, len(colIdxs))
+		for _, c := range colIdxs {
+			var v uint64
+			hasDigit := false
+			for r := 0; r < rows-1; r++ {
+				ch := grid[r][c]
+				if ch == ' ' {
+					continue
+				}
+				hasDigit = true
+				v = v*10 + uint64(ch-'0')
+			}
+
+			if hasDigit {
+				nums = append(nums, v)
+			}
+		}
+
+		res := nums[0]
+		if op == '*' {
+			for _, x := range nums[1:] {
+				res *= x
+			}
+		} else { // '+'
+			for _, x := range nums[1:] {
+				res += x
+			}
+		}
+
+		p2 += res
+	}
+
+	// p2
+	cur := make([]int, 0) // current problem
+	for c := cols2 - 1; c >= 0; c-- {
+		sep := true
+		for r := range rows {
+			if grid[r][c] != ' ' {
+				sep = false
+				break
+			}
+		}
+
+		if sep {
+			if len(cur) > 0 {
+				solveP2(cur)
+				cur = cur[:0]
+			}
+			continue
+		}
+
+		cur = append(cur, c)
+	}
+	if len(cur) > 0 {
+		solveP2(cur)
 	}
 
 	return Input{p1, p2}
