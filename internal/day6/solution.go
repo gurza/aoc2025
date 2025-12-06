@@ -14,7 +14,7 @@ func Parse(input []string) Input {
 	var p1, p2 uint64
 
 	f0 := strings.Fields(input[0])
-	cols := len(f0)
+	cols1 := len(f0)
 	rows := len(input)
 
 	ff := make([][]string, rows)
@@ -23,17 +23,18 @@ func Parse(input []string) Input {
 		ff[r] = strings.Fields(input[r])
 	}
 
-	for c := range cols {
+	// p1
+	for c := range cols1 {
 		nums := []uint64{}
 		for r := 0; r < rows-1; r++ {
 			num, _ := strconv.Atoi(ff[r][c])
 			nums = append(nums, uint64(num))
 		}
 
-		smb := ff[rows-1][c][0]
+		sym := ff[rows-1][c][0]
 
 		res := nums[0]
-		if smb == '*' {
+		if sym == '*' {
 			for _, x := range nums[1:] {
 				res *= x
 			}
