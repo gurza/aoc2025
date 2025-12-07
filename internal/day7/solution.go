@@ -27,10 +27,13 @@ func Parse(input []string) Input {
 	}
 
 	beams := make([]uint64, cols)
+	next := make([]uint64, cols)
 	beams[sCol] = 1 // one beam starting at S going down
 	for r := sRow + 1; r < rows; r++ {
 		row := input[r]
-		newBeams := make([]uint64, cols)
+		for i := range next {
+			next[i] = 0
+		}
 
 		for c, b := range beams {
 			if b == 0 {
@@ -38,7 +41,7 @@ func Parse(input []string) Input {
 			}
 			switch row[c] {
 			case '.':
-				newBeams[c] += b
+				next[c] += b
 			case '^':
 				if !seen[r][c] {
 					seen[r][c] = true
@@ -46,14 +49,14 @@ func Parse(input []string) Input {
 				}
 
 				if c > 0 {
-					newBeams[c-1] += b
+					next[c-1] += b
 				}
 				if c+1 < cols {
-					newBeams[c+1] += b
+					next[c+1] += b
 				}
 			}
 		}
-		beams = newBeams
+		beams, next = next, beams
 	}
 
 	for _, b := range beams {
