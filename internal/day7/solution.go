@@ -56,6 +56,10 @@ func Parse(input []string) Input {
 		beams = newBeams
 	}
 
+	for _, b := range beams {
+		p2 += b
+	}
+
 	return Input{p1, p2}
 }
 
