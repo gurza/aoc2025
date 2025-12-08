@@ -122,6 +122,19 @@ func Parse(input []string) Input {
 		p1 *= uint64(comps[i])
 	}
 
+	var last edge
+	for i := limit; i < len(edges); i++ {
+		e := edges[i]
+		ra := dsu.find(e.i)
+		rb := dsu.find(e.j)
+		if ra == rb {
+			continue
+		}
+		dsu.union(e.i, e.j)
+		last = e
+	}
+	p2 = uint64(points[last.i].x * points[last.j].x)
+
 	return Input{p1, p2}
 }
 
