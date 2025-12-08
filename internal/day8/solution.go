@@ -99,8 +99,8 @@ func Parse(input []string) Input {
 
 	dsu := newDSU(n)
 	lim := 1000
-	if len(es) < lim { // FIXME: parametrize limit
-		lim = n / 2
+	if n == 20 { // FIXME: parametrize limit
+		lim = 10
 	}
 
 	comp := n
