@@ -20,6 +20,47 @@ type edge struct {
 	d2   int
 }
 
+// dsu implements a Disjoint Set Union structure.
+type dsu struct {
+	parent []int // parent pointer
+	size   []int // size of the component represented by root
+}
+
+// newDSU initializes a DSU of n independent elements (0..n-1),
+// each starting as its own component of size 1.
+func newDSU(n int) *dsu {
+	parent := make([]int, n)
+	size := make([]int, n)
+	for i := range n {
+		parent[i] = i
+		size[i] = 1
+	}
+	return &dsu{parent, size}
+}
+
+// find returns the root of x's component.
+func (d *dsu) find(x int) int {
+	if d.parent[x] != x {
+		d.parent[x] = d.find(d.parent[x])
+	}
+	return d.parent[x]
+}
+
+// union merges the components containing a and b,
+// attaching the smaller component under the larger one to keep trees shallow.
+func (d *dsu) union(a, b int) {
+	ra := d.find(a)
+	rb := d.find(b)
+	if ra == rb {
+		return
+	}
+	if d.size[ra] < d.size[rb] {
+		ra, rb = rb, ra
+	}
+	d.parent[rb] = ra
+	d.size[ra] += d.size[rb]
+}
+
 func Parse(input []string) Input {
 	var p1, p2 uint64
 
@@ -53,6 +94,8 @@ func Parse(input []string) Input {
 		}
 		return edges[a].d2 < edges[b].d2
 	})
+
+	// TODO: DSU
 
 	return Input{p1, p2}
 }
