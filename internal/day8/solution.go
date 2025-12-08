@@ -48,94 +48,119 @@ func (d *dsu) find(x int) int {
 
 // union merges the components containing a and b,
 // attaching the smaller component under the larger one to keep trees shallow.
-func (d *dsu) union(a, b int) {
+// It returns true if a merge actually happened.
+func (d *dsu) union(a, b int) bool {
 	ra := d.find(a)
 	rb := d.find(b)
 	if ra == rb {
-		return
+		return false
 	}
 	if d.size[ra] < d.size[rb] {
 		ra, rb = rb, ra
 	}
 	d.parent[rb] = ra
 	d.size[ra] += d.size[rb]
+	return true
 }
 
 func Parse(input []string) Input {
 	var p1, p2 uint64
 
-	var points []point
-	for _, line := range input {
-		pp := strings.Split(line, ",")
+	var pts []point
+	for _, s := range input {
+		pp := strings.Split(s, ",")
 		x, _ := strconv.Atoi(pp[0])
 		y, _ := strconv.Atoi(pp[1])
 		z, _ := strconv.Atoi(pp[2])
-		points = append(points, point{x, y, z})
+		pts = append(pts, point{x, y, z})
 	}
-	n := len(points)
+	n := len(pts)
 
-	edges := make([]edge, 0, n*(n-1)/2)
+	es := make([]edge, 0, n*(n-1)/2)
 	for i := range n {
 		for j := i + 1; j < n; j++ {
-			dx := points[i].x - points[j].x
-			dy := points[i].y - points[j].y
-			dz := points[i].z - points[j].z
+			dx := pts[i].x - pts[j].x
+			dy := pts[i].y - pts[j].y
+			dz := pts[i].z - pts[j].z
 			d2 := dx*dx + dy*dy + dz*dz
-			edges = append(edges, edge{i, j, d2})
+			es = append(es, edge{i, j, d2})
 		}
 	}
 
-	sort.Slice(edges, func(a, b int) bool {
-		if edges[a].d2 == edges[b].d2 {
-			if edges[a].i == edges[b].i {
-				return edges[a].j < edges[b].j
+	sort.Slice(es, func(a, b int) bool {
+		if es[a].d2 == es[b].d2 {
+			if es[a].i == es[b].i {
+				return es[a].j < es[b].j
 			}
-			return edges[a].i < edges[b].i
+			return es[a].i < es[b].i
 		}
-		return edges[a].d2 < edges[b].d2
+		return es[a].d2 < es[b].d2
 	})
 
 	dsu := newDSU(n)
-	limit := 1000
-	if len(edges) < limit { // FIXME: parametrize limit
-		limit = n / 2
-	}
-	for i := range limit {
-		e := edges[i]
-		dsu.union(e.i, e.j)
+	lim := 1000
+	if len(es) < lim { // FIXME: parametrize limit
+		lim = n / 2
 	}
 
-	seen := make(map[int]bool)
-	var comps []int
-	for i := range n {
-		root := dsu.find(i)
-		if !seen[root] {
-			seen[root] = true
-			comps = append(comps, dsu.size[root])
+	comp := n
+	k := 0
+	done1 := false
+
+	var last edge
+	done2 := false
+
+	for _, e := range es {
+		k++
+		if dsu.union(e.i, e.j) {
+			comp--
+			if !done2 && comp == 1 {
+				last = e
+				done2 = true
+			}
+		}
+
+		if !done1 && k == lim {
+			p1 = calcP1(dsu, n)
+			done1 = true
+		}
+
+		if done1 && done2 {
+			break
 		}
 	}
+
+	if !done1 {
+		p1 = calcP1(dsu, n)
+	}
+	if done2 {
+		p2 = uint64(pts[last.i].x * pts[last.j].x)
+	}
+
+	return Input{p1, p2}
+}
+
+func calcP1(d *dsu, n int) uint64 {
+	seen := make(map[int]bool, n)
+	comps := make([]int, 0, n)
+
+	for i := 0; i < n; i++ {
+		r := d.find(i)
+		if !seen[r] {
+			seen[r] = true
+			comps = append(comps, d.size[r])
+		}
+	}
+
 	sort.Slice(comps, func(i, j int) bool {
 		return comps[i] > comps[j]
 	})
-	p1 = 1
-	for i := range 3 {
-		p1 *= uint64(comps[i])
-	}
 
-	var last edge
-	for i := limit; i < len(edges); i++ {
-		e := edges[i]
-		ra := dsu.find(e.i)
-		rb := dsu.find(e.j)
-		if ra == rb {
-			continue
-		}
-		dsu.union(e.i, e.j)
-		last = e
+	res := uint64(1)
+	for i := 0; i < 3 && i < len(comps); i++ {
+		res *= uint64(comps[i])
 	}
-	p2 = uint64(points[last.i].x * points[last.j].x)
-
-	return Input{p1, p2}
+	return res
 }
 
 func Part1(input Input) uint64 {
