@@ -95,7 +95,29 @@ func Parse(input []string) Input {
 		return edges[a].d2 < edges[b].d2
 	})
 
-	// TODO: DSU
+	dsu := newDSU(n)
+	limit := 1000 // todo: parametrize
+	for i := range limit {
+		e := edges[i]
+		dsu.union(e.i, e.j)
+	}
+
+	seen := make(map[int]bool)
+	var comps []int
+	for i := range n {
+		root := dsu.find(i)
+		if !seen[root] {
+			seen[root] = true
+			comps = append(comps, dsu.size[root])
+		}
+	}
+	sort.Slice(comps, func(i, j int) bool {
+		return comps[i] > comps[j]
+	})
+	p1 = 1
+	for i := range 3 {
+		p1 *= uint64(comps[i])
+	}
 
 	return Input{p1, p2}
 }
