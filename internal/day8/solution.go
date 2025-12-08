@@ -96,7 +96,10 @@ func Parse(input []string) Input {
 	})
 
 	dsu := newDSU(n)
-	limit := 1000 // todo: parametrize
+	limit := 1000
+	if len(edges) < limit { // FIXME: parametrize limit
+		limit = n / 2
+	}
 	for i := range limit {
 		e := edges[i]
 		dsu.union(e.i, e.j)
