@@ -28,17 +28,8 @@ func Parse(input []string) Input {
 	n := len(pts)
 	for i := range n {
 		for j := i + 1; j < n; j++ {
-			dx := pts[i].x - pts[j].x
-			if dx < 0 {
-				dx = -dx
-			}
-			dx += 1
-			dy := pts[i].y - pts[j].y
-			if dy < 0 {
-				dy = -dy
-			}
-			dy += 1
-
+			dx := absInt(pts[i].x-pts[j].x) + 1
+			dy := absInt(pts[i].y-pts[j].y) + 1
 			a := uint64(dx) * uint64(dy)
 			if a > p1 {
 				p1 = a
@@ -47,6 +38,13 @@ func Parse(input []string) Input {
 	}
 
 	return Input{p1, p2}
+}
+
+func absInt(a int) int {
+	if a < 0 {
+		return -a
+	}
+	return a
 }
 
 func Part1(input Input) uint64 {
