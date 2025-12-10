@@ -15,6 +15,7 @@ import (
 	"github.com/gurza/aoc2025/internal/day6"
 	"github.com/gurza/aoc2025/internal/day7"
 	"github.com/gurza/aoc2025/internal/day8"
+	"github.com/gurza/aoc2025/internal/day9"
 )
 
 func main() {
@@ -64,6 +65,10 @@ func main() {
 		input := day8.Parse(lines)
 		fmt.Printf("Part 1: %d\n", day8.Part1(input))
 		fmt.Printf("Part 2: %d\n", day8.Part2(input))
+	case 9:
+		input := day9.Parse(lines)
+		fmt.Printf("Part 1: %d\n", day9.Part1(input))
+		fmt.Printf("Part 2: %d\n", day9.Part2(input))
 	default:
 		fmt.Fprintf(os.Stderr, "Day %d not implemented yet.\n", *day)
 	}
