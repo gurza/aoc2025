@@ -43,6 +43,7 @@ func parse(s string) machine {
 	// buttons (fs[1..n-1])
 	var btns []int
 	for _, t := range fs[1:last] {
+		t = t[1 : len(t)-1]
 		var mask int
 		for p := range strings.SplitSeq(t, ",") {
 			i, _ := strconv.Atoi(p)
@@ -51,9 +52,11 @@ func parse(s string) machine {
 		btns = append(btns, mask)
 	}
 
-	// joltages (fs[last])
+	// joltages {fs[last]}
 	var js []int
-	for p := range strings.SplitSeq(fs[last], ",") {
+	jl := fs[last]
+	jl = jl[1 : len(jl)-1]
+	for p := range strings.SplitSeq(jl, ",") {
 		j, _ := strconv.Atoi(p)
 		js = append(js, j)
 	}
