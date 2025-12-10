@@ -96,6 +96,7 @@ func Parse(input []string) Input {
 	g := newGrid(len(shrinkX), len(shrinkY), unknown)
 	rasterizePolygonEdges(shrunk, g)
 	floodFillOutside(g)
+	buildPrefixSums(g)
 
 	return Input{p1, p2}
 }
@@ -205,6 +206,29 @@ func floodFillOutside(g *grid) {
 				g.set(next, outside)
 				queue = append(queue, next)
 			}
+		}
+	}
+}
+
+// buildPrefixSums transforms the grid into a 2D prefix-sum table (summed-area table).
+// Each cell (x,y) will contain the sum of "inside-ish" cells (not outside) in the
+// rectangle from (0,0) up to (x,y), inclusive.
+func buildPrefixSums(g *grid) {
+	for y := 1; y < g.height; y++ {
+		for x := 1; x < g.width; x++ {
+			p := tile{x: x, y: y}
+
+			value := 0
+			if g.get(p) != outside {
+				value = 1
+			}
+
+			up := tile{x: x, y: y - 1}
+			left := tile{x: x - 1, y: y}
+			upLeft := tile{x: x - 1, y: y - 1}
+
+			sum := value + g.get(up) + g.get(left) - g.get(upLeft)
+			g.set(p, sum)
 		}
 	}
 }
