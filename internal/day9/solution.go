@@ -46,9 +46,19 @@ func (g *grid) index(t tile) int {
 	return t.y*g.width + t.x
 }
 
+// get returns the value at the given tile.
+func (g *grid) get(t tile) int {
+	return g.values[g.index(t)]
+}
+
 // set writes the value at the given tile.
 func (g *grid) set(t tile, v int) {
 	g.values[g.index(t)] = v
+}
+
+// contains reports whether the tile is inside the grid bounds.
+func (g *grid) contains(t tile) bool {
+	return t.x >= 0 && t.x < g.width && t.y >= 0 && t.y < g.height
 }
 
 func Parse(input []string) Input {
@@ -85,6 +95,7 @@ func Parse(input []string) Input {
 	}
 	g := newGrid(len(shrinkX), len(shrinkY), unknown)
 	rasterizePolygonEdges(shrunk, g)
+	floodFillOutside(g)
 
 	return Input{p1, p2}
 }
@@ -160,6 +171,39 @@ func rasterizePolygonEdges(shrunk []tile, g *grid) {
 		for x := x1; x <= x2; x++ {
 			for y := y1; y <= y2; y++ {
 				g.set(tile{x: x, y: y}, inside)
+			}
+		}
+	}
+}
+
+// floodFillOutside performs a BFS flood fill starting from the origin tile
+// (0,0), marking all reachable UNKNOWN cells as OUTSIDE.
+func floodFillOutside(g *grid) {
+	origin := tile{0, 0}
+	if !g.contains(origin) {
+		return
+	}
+	if g.get(origin) != unknown {
+		g.set(origin, outside)
+	}
+
+	queue := []tile{origin}
+	var dirs = []tile{
+		{0, -1},
+		{0, 1},
+		{-1, 0},
+		{1, 0},
+	}
+
+	for len(queue) > 0 {
+		p := queue[0]
+		queue = queue[1:]
+
+		for _, d := range dirs {
+			next := tile{x: p.x + d.x, y: p.y + d.y}
+			if g.contains(next) && g.get(next) == unknown {
+				g.set(next, outside)
+				queue = append(queue, next)
 			}
 		}
 	}
