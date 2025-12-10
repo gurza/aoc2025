@@ -98,6 +98,36 @@ func Parse(input []string) Input {
 	floodFillOutside(g)
 	buildPrefixSums(g)
 
+	for i := range n {
+		for j := i + 1; j < n; j++ {
+			a := shrunk[i]
+			b := shrunk[j]
+			x1, y1, x2, y2 := edgeBounds(a, b)
+
+			expected := (x2 - x1 + 1) * (y2 - y1 + 1)
+
+			// prefix-sum rectangle query in compressed grid
+			p22 := tile{x: x2, y: y2}
+			p12 := tile{x: x1 - 1, y: y2}
+			p21 := tile{x: x2, y: y1 - 1}
+			p11 := tile{x: x1 - 1, y: y1 - 1}
+
+			actual := g.get(p22) - g.get(p12) - g.get(p21) + g.get(p11)
+
+			if expected == actual {
+				// rectangle fully inside
+				x1o, y1o := tiles[i].x, tiles[i].y
+				x2o, y2o := tiles[j].x, tiles[j].y
+				dx := absInt(x1o-x2o) + 1
+				dy := absInt(y1o-y2o) + 1
+				a := uint64(dx) * uint64(dy)
+				if a > p2 {
+					p2 = a
+				}
+			}
+		}
+	}
+
 	return Input{p1, p2}
 }
 
