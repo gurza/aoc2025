@@ -24,17 +24,20 @@ func Parse(input []string) Input {
 		}
 	}
 
-	p1 = uint64(paths(graph, idx("you"), idx("out")))
+	p1 = uint64(paths(graph, "you", "out"))
+
+	p2 = uint64(paths(graph, "svr", "fft") * paths(graph, "fft", "dac") * paths(graph, "dac", "out"))
+	p2 += uint64(paths(graph, "svr", "dac") * paths(graph, "dac", "fft") * paths(graph, "fft", "out"))
 
 	return Input{p1, p2}
 }
 
-func paths(graph [][]uint, start, end uint) uint {
+func paths(graph [][]uint, start, end string) uint {
 	cache := make([]uint, len(graph))
 	for i := range cache {
 		cache[i] = math.MaxUint
 	}
-	return dfs(graph, cache, start, end)
+	return dfs(graph, cache, idx(start), idx(end))
 }
 
 func dfs(graph [][]uint, cache []uint, node, end uint) uint {
